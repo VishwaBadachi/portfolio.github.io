@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Business Case 1: User Terminal Initialization</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0d6efd;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    h2 {
+      color: #0d6efd;
+      margin-top: 2rem;
+    }
+    pre {
+      background-color: #eee;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 8px;
+      font-family: Consolas, monospace;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    .tag {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      padding: 0.2rem 0.6rem;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Business Case 1: User Terminal Initialization</h1>
+
+    <div style="text-align: center;">              
+                <img src="../../assets/img/Init and Handover.jpg" style="display: block; margin-left: auto; margin-right: auto; width: 900px; height: 550px;">
+
+    </div>
+
+    <div class="section">
+      <h2>System Design Overview</h2>
+      <p>
+        When a new user terminal (phased array antenna) is powered on, it begins scanning the sky using phased-array steering to detect available Starlink satellites. Once potential satellites are identified, the terminal evaluates each based on signal strength, elevation angle, and latency.
+        The terminal then performs a DHCP handshake to acquire a local IP and uses DNS to resolve Starlink backend services. A secure key exchange using public-key cryptography authenticates the device. Finally, a control channel is opened, completing the initialization process and enabling data transmission.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Pros</h2>
+      <p>
+        <span class="tag">✔</span> Plug-and-play setup with minimal user effort.<br>
+        <span class="tag">✔</span> Automatically selects optimal satellite link.<br>
+        <span class="tag">✔</span> Secure connection through authentication.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Cons</h2>
+      <p>
+        <span class="tag">✖</span> Slower setup in obstructed environments.<br>
+        <span class="tag">✖</span> Requires clear line-of-sight to satellites.<br>
+        <span class="tag">✖</span> Sensitive to loss of cryptographic keys.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Key Data Structures</h2>
+      <p>
+        <span class="tag">Min-Heap</span> To select satellite with lowest latency.<br>
+        <span class="tag">Hash Table</span> For storing device credentials and session tokens.<br>
+        <span class="tag">State Machine</span> To manage initialization phases.
+      </p>
+    </div>
+
+    <div style="text-align: center;">
+    <figure style="display: inline-block;">
+        <img src="../../assets/img/minHeap.gif" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            Min-Heap Simulation (src: Medium) 
+        </figcaption>
+    </figure>
+</div>
+
+    <div class="section">
+      <h2>Example Problem</h2>
+      <p>Simulate satellite selection by choosing the one with the lowest latency using a Min-Heap.</p>
+    </div>
+
+    <div class="section">
+      <h2>C Code (Min-Heap Satellite Selection)</h2>
+      <pre><code>#include &lt;stdio.h&gt;
+#include &lt;limits.h&gt;
+
+#define MAX_SATELLITES 100
+
+int latency[MAX_SATELLITES];
+int heap_size = 0;
+
+void swap(int *a, int *b) {
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+void insert(int value) {
+    int i = heap_size++;
+    latency[i] = value;
+
+    while (i != 0 && latency[(i - 1) / 2] > latency[i]) {
+        swap(&latency[i], &latency[(i - 1) / 2]);
+        i = (i - 1) / 2;
+    }
+}
+
+int extractMin() {
+    if (heap_size <= 0)
+        return INT_MAX;
+
+    int root = latency[0];
+    latency[0] = latency[--heap_size];
+
+    int i = 0;
+    while (1) {
+        int left = 2*i + 1, right = 2*i + 2, smallest = i;
+
+        if (left < heap_size && latency[left] < latency[smallest])
+            smallest = left;
+        if (right < heap_size && latency[right] < latency[smallest])
+            smallest = right;
+
+        if (smallest != i) {
+            swap(&latency[i], &latency[smallest]);
+            i = smallest;
+        } else break;
+    }
+
+    return root;
+}
+
+int main() {
+    insert(35); // Satellite 1
+    insert(22); // Satellite 2
+    insert(18); // Satellite 3
+    insert(40); // Satellite 4
+
+    printf("Best satellite selected with latency: %d ms\n", extractMin());
+    return 0;
+}</code></pre>
+    </div>
+
+    <div class="section">
+      <h2>Efficiency</h2>
+      <p>
+        <strong>Time Complexity:</strong> O(log n) for both insert and extractMin operations.<br>
+        <strong>Space Complexity:</strong> O(n) to store latency values of n satellites.
+      </p>
+    </div>
+    <div class="section">
+  <h2>Inferences</h2>
+  <p>
+    The initialization process of the Starlink user terminal combines intelligent hardware design with efficient data structures to ensure rapid and reliable connectivity. Based on the simulated and described architecture, the following inferences can be drawn:
+  </p>
+  <ul>
+    <li><strong>Smart Selection:</strong> The use of a min-heap ensures the best satellite is chosen in logarithmic time, even when scanning a large number of visible satellites.</li>
+    <li><strong>Resilience:</strong> The layered handshake process, including authentication and session establishment, supports secure onboarding and minimizes unauthorized access risks.</li>
+    <li><strong>Automation:</strong> Fully automated satellite discovery and session setup reduce user intervention and improve scalability for consumer and enterprise users.</li>
+    <li><strong>Latency-Aware Networking:</strong> Selecting satellites based on latency (rather than proximity alone) improves application responsiveness, especially for real-time use cases like VoIP and emergency communications.</li>
+    <li><strong>Optimization Potential:</strong> Additional heuristics (e.g., satellite congestion or predicted movement) can be integrated into the heap comparison logic for even smarter selection.</li>
+  </ul>
+</div>
+
+  </div>
+</body>
+</html>

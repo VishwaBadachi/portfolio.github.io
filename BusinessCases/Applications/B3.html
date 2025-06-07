@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starlink Satellite-Based CDN for Entertainment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #1a73e8;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 1.8em;
+            margin-top: 30px;
+        }
+        h3 {
+            font-size: 1.4em;
+            margin-top: 20px;
+        }
+        p, li {
+            font-size: 1.1em;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        .code-block pre {
+            margin: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #1a73e8;
+            color: #fff;
+        }
+        .highlight {
+            background: #e8f0fe;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Case Study: Starlink Satellite-Based CDN for Entertainment</h1>
+        <div class="section">
+            <h2>Business Use Case: Optimizing Content Delivery via Satellites</h2>
+            <p><strong>Background:</strong> Starlink, SpaceX’s LEO satellite constellation, serves millions globally with high-speed, low-latency internet. The network faces challenges in delivering high-bandwidth entertainment content (e.g., 4K streaming, cloud gaming) to remote areas with limited terrestrial infrastructure.</p>
+            <p><strong>Objective:</strong> Develop a satellite-based Content Delivery Network (CDN) to deliver seamless entertainment experiences, optimizing bandwidth, storage, and content search.</p>
+            <p><strong>Solution:</strong> Use Huffman coding for data compression, tries for content metadata search, and LRU caching for efficient storage management on satellites.</p>
+            
+            <h3>Network Architecture</h3>
+            <ul>
+                <li><strong>Nodes:</strong> 7,000+ LEO satellites with inter-satellite links (ISLs), ground stations, and user terminals.</li>
+                <li><strong>Edges:</strong> Laser-based ISLs (10-100 Gbps) and ground-to-satellite links (500 Mbps-1 Gbps).</li>
+                <li><strong>Data Flow:</strong> Content (e.g., video streams, game assets) cached on satellites and delivered to users via optimal paths.</li>
+            </ul>
+
+            <h3>Algorithm Application</h3>
+            <p>The CDN leverages three algorithms:</p>
+            <ul>
+                <li><strong>Huffman Coding:</strong> Compresses video/audio data to reduce bandwidth usage on ISLs, enabling faster transmission.</li>
+                <li><strong>Trie:</strong> Indexes content metadata (e.g., movie titles) for fast prefix-based searches, supporting features like autocomplete.</li>
+                <li><strong>LRU Cache:</strong> Manages limited satellite storage (1-10 GB) by prioritizing trending content and evicting least recently used items.</li>
+            </ul>
+            <div style="text-align: center;">
+    <figure style="display: inline-block;">
+        <img src="../../assets/img/Huffman.gif" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            Huffman Coding Simulation (src: Wikimedia Commons) 
+        </figcaption>
+    </figure>
+</div>
+            <p><strong>Investment:</strong></p>
+            <ul>
+                <li>Firmware upgrades for algorithm implementation (₹83,20,00,000).</li>
+                <li>Additional satellite storage modules (₹41,60,00,000).</li>
+                <li><strong>Total Cost:</strong> ₹124,80,00,000 for CDN deployment.</li>
+            </ul>
+
+            <h3>C Implementation of CDN Algorithms</h3>
+            <p>Below is a C program implementing Huffman coding, trie, and LRU cache for the Starlink CDN, optimized for satellite firmware.</p>
+            <div class="code-block">
+                <pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+// Huffman Coding Implementation
+#define MAX_TREE_HT 256
+
+typedef struct MinHeapNode {
+    char data;
+    unsigned freq;
+    struct MinHeapNode *left, *right;
+} MinHeapNode;
+
+typedef struct MinHeap {
+    unsigned size;
+    unsigned capacity;
+    MinHeapNode **array;
+} MinHeap;
+
+MinHeapNode* newNode(char data, unsigned freq) {
+    MinHeapNode* node = (MinHeapNode*)malloc(sizeof(MinHeapNode));
+    node->left = node->right = NULL;
+    node->data = data;
+    node->freq = freq;
+    return node;
+}
+
+MinHeap* createMinHeap(unsigned capacity) {
+    MinHeap* minHeap = (MinHeap*)malloc(sizeof(MinHeap));
+    minHeap->size = 0;
+    minHeap->capacity = capacity;
+    minHeap->array = (MinHeapNode**)malloc(capacity * sizeof(MinHeapNode*));
+    return minHeap;
+}
+
+void swapMinHeapNode(MinHeapNode** a, MinHeapNode** b) {
+    MinHeapNode* t = *a;
+    *a = *b;
+    *b = t;
+}
+
+void minHeapify(MinHeap* minHeap, int idx) {
+    int smallest = idx;
+    int left = 2 * idx + 1;
+    int right = 2 * idx + 2;
+
+    if (left < minHeap->size && minHeap->array[left]->freq < minHeap->array[smallest]->freq)
+        smallest = left;
+    if (right < minHeap->size && minHeap->array[right]->freq < minHeap->array[smallest]->freq)
+        smallest = right;
+
+    if (smallest != idx) {
+        swapMinHeapNode(&minHeap->array[smallest], &minHeap->array[idx]);
+        minHeapify(minHeap, smallest);
+    }
+}
+
+MinHeap* buildMinHeap(char data[], unsigned freq[], int size) {
+    MinHeap* minHeap = createMinHeap(size);
+    for (int i = 0; i < size; ++i)
+        minHeap->array[i] = newNode(data[i], freq[i]);
+    minHeap->size = size;
+    for (int i = (size - 1) / 2; i >= 0; --i)
+        minHeapify(minHeap, i);
+    return minHeap;
+}
+
+MinHeapNode* buildHuffmanTree(char data[], unsigned freq[], int size) {
+    MinHeapNode *left, *right, *top;
+    MinHeap* minHeap = buildMinHeap(data, freq, size);
+    while (minHeap->size != 1) {
+        left = minHeap->array[0];
+        minHeap->array[0] = minHeap->array[minHeap->size - 1];
+        minHeap->size--;
+        minHeapify(minHeap, 0);
+        right = minHeap->array[0];
+        minHeap->array[0] = minHeap->array[minHeap->size - 1];
+        minHeap->size--;
+        minHeapify(minHeap, 0);
+        top = newNode('$', left->freq + right->freq);
+        top->left = left;
+        top->right = right;
+        minHeap->array[minHeap->size++] = top;
+        minHeapify(minHeap, 0);
+    }
+    return minHeap->array[0];
+}
+
+void printCodes(MinHeapNode* root, int arr[], int top, char* codes[], int* codeLengths) {
+    if (root->left) {
+        arr[top] = 0;
+        printCodes(root->left, arr, top + 1, codes, codeLengths);
+    }
+    if (root->right) {
+        arr[top] = 1;
+        printCodes(root->right, arr, top + 1, codes, codeLengths);
+    }
+    if (!root->left && !root->right) {
+        codes[root->data] = (char*)malloc(top + 1);
+        codeLengths[root->data] = top;
+        for (int i = 0; i < top; i++)
+            codes[root->data][i] = arr[i] + '0';
+        codes[root->data][top] = '\0';
+    }
+}
+
+void huffmanEncode(char* data, int size, char* output, int* outSize, char* codes[], int* codeLengths) {
+    *outSize = 0;
+    for (int i = 0; i < size; i++) {
+        strcpy(output + *outSize, codes[(unsigned char)data[i]]);
+        *outSize += codeLengths[(unsigned char)data[i]];
+    }
+}
+
+// Trie Implementation
+#define ALPHABET_SIZE 26
+
+typedef struct TrieNode {
+    struct TrieNode *children[ALPHABET_SIZE];
+    int isEndOfWord;
+} TrieNode;
+
+TrieNode* createTrieNode() {
+    TrieNode* node = (TrieNode*)malloc(sizeof(TrieNode));
+    node->isEndOfWord = 0;
+    for (int i = 0; i < ALPHABET_SIZE; i++)
+        node->children[i] = NULL;
+    return node;
+}
+
+void insertTrie(TrieNode* root, char* key) {
+    TrieNode* curr = root;
+    for (int i = 0; key[i]; i++) {
+        int index = key[i] - 'a';
+        if (!curr->children[index])
+            curr->children[index] = createTrieNode();
+        curr = curr->children[index];
+    }
+    curr->isEndOfWord = 1;
+}
+
+int searchTrie(TrieNode* root, char* key) {
+    TrieNode* curr = root;
+    for (int i = 0; key[i]; i++) {
+        int index = key[i] - 'a';
+        if (!curr->children[index])
+            return 0;
+        curr = curr->children[index];
+    }
+    return curr->isEndOfWord;
+}
+
+// LRU Cache Implementation
+#define MAX_CACHE_SIZE 100
+
+typedef struct CacheNode {
+    char* key;
+    char* value;
+    struct CacheNode *prev, *next;
+} CacheNode;
+
+typedef struct LRUCache {
+    CacheNode *head, *tail;
+    int size, capacity;
+    CacheNode* cache[MAX_CACHE_SIZE];
+} LRUCache;
+
+LRUCache* createLRUCache(int capacity) {
+    LRUCache* cache = (LRUCache*)malloc(sizeof(LRUCache));
+    cache->size = 0;
+    cache->capacity = capacity;
+    cache->head = (CacheNode*)malloc(sizeof(CacheNode));
+    cache->tail = (CacheNode*)malloc(sizeof(CacheNode));
+    cache->head->next = cache->tail;
+    cache->tail->prev = cache->head;
+    for (int i = 0; i < MAX_CACHE_SIZE; i++)
+        cache->cache[i] = NULL;
+    return cache;
+}
+
+void addToCache(LRUCache* cache, char* key, char* value) {
+    int index = (unsigned char)key[0] % MAX_CACHE_SIZE;
+    if (cache->cache[index]) {
+        CacheNode* node = cache->cache[index];
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+        free(node->key);
+        free(node->value);
+        free(node);
+    }
+    CacheNode* node = (CacheNode*)malloc(sizeof(CacheNode));
+    node->key = strdup(key);
+    node->value = strdup(value);
+    node->next = cache->head->next;
+    node->prev = cache->head;
+    cache->head->next->prev = node;
+    cache->head->next = node;
+    cache->cache[index] = node;
+    if (cache->size >= cache->capacity) {
+        CacheNode* lru = cache->tail->prev;
+        lru->prev->next = cache->tail;
+        cache->tail->prev = lru->prev;
+        int lruIndex = (unsigned char)lru->key[0] % MAX_CACHE_SIZE;
+        cache->cache[lruIndex] = NULL;
+        free(lru->key);
+        free(lru->value);
+        free(lru);
+    } else {
+        cache->size++;
+    }
+}
+
+char* getFromCache(LRUCache* cache, char* key) {
+    int index = (unsigned char)key[0] % MAX_CACHE_SIZE;
+    if (cache->cache[index]) {
+        CacheNode* node = cache->cache[index];
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+        node->next = cache->head->next;
+        node->prev = cache->head;
+        cache->head->next->prev = node;
+        cache->head->next = node;
+        return node->value;
+    }
+    return NULL;
+}
+
+// Main function to demonstrate usage
+int main() {
+    // Huffman Coding Example
+    char data[] = {'a', 'b', 'c'};
+    unsigned freq[] = {5, 9, 12};
+    int size = sizeof(data) / sizeof(data[0]);
+    MinHeapNode* root = buildHuffmanTree(data, freq, size);
+    char* codes[MAX_TREE_HT];
+    int codeLengths[MAX_TREE_HT] = {0};
+    int arr[MAX_TREE_HT];
+    printCodes(root, arr, 0, codes, codeLengths);
+    char input[] = "abc";
+    char output[100];
+    int outSize;
+    huffmanEncode(input, strlen(input), output, &outSize, codes, codeLengths);
+    printf("Huffman Encoded: %s\n", output);
+
+    // Trie Example
+    TrieNode* trieRoot = createTrieNode();
+    insertTrie(trieRoot, "starwars");
+    insertTrie(trieRoot, "startrek");
+    printf("Search 'starwars': %d\n", searchTrie(trieRoot, "starwars")); // Should print 1
+    printf("Search 'star': %d\n", searchTrie(trieRoot, "star")); // Should print 0
+
+    // LRU Cache Example
+    LRUCache* cache = createLRUCache(2);
+    addToCache(cache, "movie1", "Star Wars Data");
+    addToCache(cache, "movie2", "Star Trek Data");
+    printf("Cache Get 'movie1': %s\n", getFromCache(cache, "movie1")); // Should print Star Wars Data
+    addToCache(cache, "movie3", "Avatar Data"); // Evicts movie2
+    printf("Cache Get 'movie2': %s\n", getFromCache(cache, "movie2")); // Should print NULL
+
+    return 0;
+}
+                </pre>
+            </div>
+
+            <h3>How It Works</h3>
+            <p>The C program implements three algorithms for the Starlink CDN:</p>
+            <ul>
+                <li><strong>Huffman Coding:</-strong> Compresses a sample input ("abc") using a Huffman tree based on symbol frequencies, reducing bandwidth usage on ISLs.</li>
+                <li><strong>Trie:</strong> Indexes movie titles ("starwars", "startrek") for fast search, returning 1 for found titles and 0 for partial matches.</li>
+                <li><strong>LRU Cache:</strong> Manages a cache with capacity 2, storing content like "Star Wars Data" and evicting least recently used items (e.g., "Star Trek Data" when adding "Avatar Data").</li>
+            </ul>
+            <p>These algorithms enable efficient content delivery, search, and storage management on Starlink’s satellites.</p>
+        </div>
+        <div class="section">
+    <h2>Time and Space Complexity & Inference</h2>
+    
+    <h3>1. Huffman Coding</h3>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(n log n) — for building the priority queue and the Huffman tree.</li>
+        <li><strong>Space Complexity:</strong> O(n) — for storing the tree and the codes.</li>
+        <li><strong>Inference:</strong> Suitable for satellite-based compression due to its linear scalability and bandwidth optimization in high-throughput ISLs.</li>
+    </ul>
+
+    <h3>2. Trie</h3>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(m) — where m is the length of the word being inserted or searched.</li>
+        <li><strong>Space Complexity:</strong> O(ALPHABET_SIZE * m * n) — where n is the number of words.</li>
+        <li><strong>Inference:</strong> Fast prefix-based lookup is ideal for satellite-side metadata indexing and auto-complete in constrained environments.</li>
+    </ul>
+
+    <h3>3. LRU Cache</h3>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(1) — for both get and put operations using a hashmap and doubly-linked list.</li>
+        <li><strong>Space Complexity:</strong> O(capacity) — proportional to the maximum number of cached items.</li>
+        <li><strong>Inference:</strong> LRU is efficient for satellite onboard caching to prioritize trending or recently accessed content in limited storage space.</li>
+    </ul>
+</div>
+
+    </div>
+</body>
+</html>

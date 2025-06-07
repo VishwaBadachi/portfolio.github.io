@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaChile IoT Optimization with Starlink</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #1a73e8;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 1.8em;
+            margin-top: 30px;
+        }
+        h3 {
+            font-size: 1.4em;
+            margin-top: 20px;
+        }
+        p, li {
+            font-size: 1.1em;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        .code-block pre {
+            margin: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #1a73e8;
+            color: #fff;
+        }
+        .highlight {
+            background: #e8f0fe;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Real Case Study: AquaChile IoT Optimization with Starlink</h1>
+        <div class="section">
+            <h2>Business Use Case: IoT Sensor Data Analysis for Aquaculture</h2>
+            <p><strong>Background:</strong> AquaChile, a leading aquaculture company in Chile, operates fish farming sites in remote southern regions. Using over 80 Starlink antennas, they enable real-time IoT data transmission for monitoring water quality (e.g., oxygen levels, temperature) and fish activity across multiple sites.</p>
+            <p><strong>Objective:</strong> Efficiently process range queries on sensor data to detect critical conditions (e.g., oxygen levels below 5 mg/L) over specific time intervals, optimizing operations and ensuring fish health.</p>
+            <p><strong>Solution:</strong> Leverage MO's algorithm to process range queries on large datasets of sensor readings, utilizing Starlink’s high-speed, low-latency connectivity for real-time data aggregation.</p>
+            
+            <h3>System Architecture</h3>
+            <ul>
+                <li><strong>IoT Devices:</strong> Sensors at 10 remote fish farming sites, each collecting data (e.g., oxygen levels) every minute.</li>
+                <li><strong>Connectivity:</strong> Starlink antennas (150 Mbps download, ~20 ms latency) transmit data to a central server.</li>
+                <li><strong>Data Flow:</strong> Sensor readings are aggregated into a time-series dataset, with queries requesting metrics like count of low oxygen readings in a time range.</li>
+            </ul>
+
+            <h3>MO's Algorithm Application</h3>
+            <p>MO's algorithm optimizes range query processing by sorting queries using square root decomposition, minimizing the cost of adding/removing data points. It is ideal for offline queries on static datasets, such as analyzing historical sensor data for operational insights.</p>
+            <p><strong>Investment:</strong></p>
+            <ul>
+                <li>Starlink antennas (80 units, ~₹1,24,500 each, including installation).</li>
+                <li>Central server for data aggregation (₹8,30,000).</li>
+                <li><strong>Total Cost:</strong> ~₹1,07,50,000 for IoT infrastructure and connectivity.</li>
+            </ul>
+            <div style="text-align: center;">
+    <figure style="display: inline-block;">
+        <img src="../../assets/img/Mos.png" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            Image representing how MO's algorithm moves its pointer to achieve queries in different range.(src: https://pages.di.unipi.it/rossano/blog/2023/mosalgorithm/) 
+        </figcaption>
+    </figure>
+</div>
+
+            <h3>C Implementation of MO's Algorithm</h3>
+            <p>Below is a C program implementing MO's algorithm to process range queries on sensor data (e.g., count of oxygen levels below 5 mg/L in a given time range).</p>
+            <div class="code-block">
+                <pre>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define MAXN 100000 // Max sensor readings
+#define MAXQ 10000  // Max queries
+#define THRESHOLD 5 // Oxygen level threshold (mg/L)
+
+// Structure for query
+typedef struct {
+    int L, R, index;
+} Query;
+
+// Global variables
+int data[MAXN]; // Sensor data (oxygen levels)
+int block_size; // For square root decomposition
+int count = 0;  // Count of readings below threshold
+int answers[MAXQ]; // Store query results
+
+// Compare function for sorting queries
+int compare(const void *a, const void *b) {
+    Query *q1 = (Query *)a;
+    Query *q2 = (Query *)b;
+    if (q1->L / block_size != q2->L / block_size)
+        return q1->L / block_size - q2->L / block_size;
+    return q1->R - q2->R;
+}
+
+// Add element to current range
+void add(int index) {
+    if (data[index] < THRESHOLD)
+        count++;
+}
+
+// Remove element from current range
+void remove(int index) {
+    if (data[index] < THRESHOLD)
+        count--;
+}
+
+// MO's algorithm to process range queries
+void moAlgorithm(int n, Query queries[], int q) {
+    block_size = (int)sqrt(n);
+    qsort(queries, q, sizeof(Query), compare);
+
+    int currL = 0, currR = -1;
+    count = 0;
+
+    for (int i = 0; i < q; i++) {
+        int L = queries[i].L, R = queries[i].R;
+
+        // Extend or shrink range
+        while (currR < R) {
+            currR++;
+            add(currR);
+        }
+        while (currR > R) {
+            remove(currR);
+            currR--;
+        }
+        while (currL < L) {
+            remove(currL);
+            currL++;
+        }
+        while (currL > L) {
+            currL--;
+            add(currL);
+        }
+
+        answers[queries[i].index] = count;
+    }
+}
+
+int main() {
+    int n = 10; // Sample: 10 sensor readings
+    int q = 3;  // Sample: 3 queries
+    data[0] = 6; data[1] = 4; data[2] = 5; data[3] = 3; data[4] = 7;
+    data[5] = 2; data[6] = 4; data[7] = 6; data[8] = 3; data[9] = 5;
+
+    Query queries[] = {{0, 4, 0}, {2, 6, 1}, {1, 9, 2}}; // Sample queries
+
+    printf("AquaChile Sensor Data Analysis\n");
+    moAlgorithm(n, queries, q);
+
+    for (int i = 0; i < q; i++) {
+        printf("Query %d (Range %d-%d): %d readings below %d mg/L\n", 
+               i, queries[i].L, queries[i].R, answers[i], THRESHOLD);
+    }
+    return 0;
+}
+                </pre>
+            </div>
+
+            <h3>How It Works</h3>
+            <p>The C program models AquaChile’s sensor data as an array of oxygen level readings. MO's algorithm processes queries to count readings below 5 mg/L in specified time ranges. For the sample data, it might output:</p>
+            <ul>
+                <li>Query 0 (Range 0-4): 2 readings below 5 mg/L</li>
+                <li>Query 1 (Range 2-6): 3 readings below 5 mg/L</li>
+                <li>Query 2 (Range 1-9): 5 readings below 5 mg/L</li>
+            </ul>
+            <p>These results help AquaChile identify critical time periods for intervention (e.g., increasing oxygenation).</p>
+
+            <h3>Starlink’s Role</h3>
+            <p>Starlink’s low-latency (~20 ms) and high-speed (150 Mbps) connectivity ensures real-time data transmission from remote sites to the central server, enabling MO's algorithm to process queries on aggregated data efficiently.</p>
+        </div>
+        <div class="section">
+    <h2>Space and Time Complexity</h2>
+    <p><strong>Time Complexity:</strong> O((N + Q) × √N)</p>
+    <ul>
+        <li>Preprocessing: Sorting Q queries takes O(Q log Q)</li>
+        <li>Each query is processed in amortized O(√N) time using efficient pointer shifts</li>
+        <li><strong>Total Time:</strong> O((N + Q) × √N), efficient for large datasets with offline queries</li>
+    </ul>
+
+    <p><strong>Space Complexity:</strong> O(N + Q)</p>
+    <ul>
+        <li>O(N) for storing sensor readings</li>
+        <li>O(Q) for storing the list of queries and their answers</li>
+        <li>Additional constant space for counters and pointers</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>Inference</h2>
+    <p>The integration of MO's algorithm with Starlink connectivity provides AquaChile with a high-performance, scalable solution for analyzing critical sensor data in real-time. The algorithm's ability to handle complex queries on massive historical datasets, coupled with Starlink’s low-latency infrastructure, allows for timely decisions and improved fish welfare. This optimization reduces operational risks, improves resource allocation, and ensures regulatory compliance in aquaculture monitoring.</p>
+</div>
+    </div>
+
+</body>
+</html>

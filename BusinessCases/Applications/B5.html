@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Management Optimization with Starlink and 2D Kadane</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #1a73e8;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 1.8em;
+            margin-top: 30px;
+        }
+        h3 {
+            font-size: 1.4em;
+            margin-top: 20px;
+        }
+        p, li {
+            font-size: 1.1em;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        .code-block pre {
+            margin: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #1a73e8;
+            color: #fff;
+        }
+        .highlight {
+            background: #e8f0fe;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Case Study: Forest Fire Management with Starlink and 2D Kadane’s Algorithm</h1>
+        <div class="section">
+            <h2>Business Use Case: Optimizing Forest Fire Response</h2>
+            <p><strong>Background:</strong> In remote wilderness areas, forest fires pose significant challenges due to limited connectivity for real-time data collection. Starlink’s satellite internet, with over 80% global coverage, provides high-speed (up to 150 Mbps) and low-latency (~20 ms) connectivity to support disaster response in areas lacking terrestrial infrastructure.</p>
+            <p><strong>Objective:</strong> Analyze heat maps from thermal imaging to identify the most intense fire regions, enabling targeted deployment of firefighting resources and evacuations.</p>
+            <p><strong>Solution:</strong> Use the 2D Kadane’s Algorithm to process heat map data, identifying the subregion with the maximum cumulative fire intensity. Starlink ensures real-time transmission of heat map data from drones or satellites to a central server for analysis.</p>
+            
+            <h3>System Architecture</h3>
+            <ul>
+                <li><strong>Data Collection:</strong> Drones with thermal imaging capture heat map data across a 100 km² fire zone, divided into a 50×50 grid (each cell ~400 m²).</li>
+                <li><strong>Connectivity:</strong> Starlink antennas transmit data to a cloud server with ~20 ms latency and 150 Mbps download speed.</li>
+                <li><strong>Data Flow:</strong> Heat map data is aggregated into a 2D matrix, where each cell represents fire intensity (e.g., temperature in °C). The 2D Kadane’s Algorithm identifies the subregion with the highest total intensity.</li>
+            </ul>
+
+            <div style="text-align: center;">
+                <img src="../../assets/img/ForestFire.png" style="display: block; margin: auto; width: 700px; height: 200px;">
+            </div>
+
+            <h3>2D Kadane’s Algorithm Application</h3>
+            <p>The 2D Kadane’s Algorithm finds the maximum sum submatrix in a heat map, representing the most critical fire region. This automates the identification of high-priority zones, overcoming the limitations of manual heat map analysis, which can be subjective and slow under time pressure.</p>
+            <div style="text-align: center;">
+    <figure style="display: inline-block;">
+        <img src="../../assets/img/2DKadane.gif" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            2D-Kadane working simulation (src: makegif)
+        </figcaption>
+    </figure>
+</div>
+            <h3>Investment</h3>
+            <ul>
+                <li>Starlink antennas (10 units, ~₹1,24,500 each, including installation).</li>
+                <li>Cloud server for data processing (₹8,30,000).</li>
+                <li>Thermal imaging drones (5 units, ~₹4,15,000 each).</li>
+                <li><strong>Total Cost:</strong> ~₹33,25,000 for connectivity and data collection infrastructure.</li>
+            </ul>
+
+            <h3>Why 2D Kadane’s Algorithm Is Not Overhead</h3>
+            <p>While heat maps visually highlight fire intensity, the 2D Kadane’s Algorithm provides critical advantages:</p>
+            <ul>
+                <li><strong>Automation:</strong> Programmatically identifies the exact subregion with maximum fire intensity, eliminating subjective human interpretation.</li>
+                <li><strong>Precision:</strong> Quantifies the cumulative intensity (e.g., total temperature score) of a subregion, enabling objective prioritization of resources.</li>
+                <li><strong>Scalability:</strong> Efficiently processes large heat maps (e.g., 50×50 grids) with O(n³) complexity, suitable for vast fire zones.</li>
+                <li><strong>Integration:</strong> Outputs structured data (submatrix coordinates) that integrates with automated systems like drone navigation or GIS platforms.</li>
+                <li><strong>Composite Metrics:</strong> Handles complex heat maps combining multiple factors (e.g., temperature, fuel load), which visual inspection may not fully capture.</li>
+            </ul>
+            <p><strong>When It Might Be Overhead:</strong> For small fires with clear hotspots, visual inspection may suffice. However, in large, dynamic fires, the algorithm’s automation and precision justify the computational cost (O(n³)), especially with cloud resources accessible via Starlink.</p>
+
+            <h3>How It Helps</h3>
+            <p>The 2D Kadane’s Algorithm enhances disaster management by:</p>
+            <ul>
+                <li><strong>Optimizing Resource Allocation:</strong> Directs firefighting resources (e.g., air tankers) to the most intense fire zones, maximizing impact.</li>
+                <li><strong>Improving Response Time:</strong> Automates analysis, enabling rapid decision-making in time-critical scenarios.</li>
+                <li><strong>Enhancing Safety:</strong> Prioritizes evacuation warnings for areas near high-intensity zones, protecting communities.</li>
+                <li><strong>Supporting Real-Time Updates:</strong> Combined with Starlink’s connectivity, enables frequent heat map updates to track fire progression.</li>
+            </ul>
+
+            <h3>C Implementation of 2D Kadane’s Algorithm</h3>
+            <p>Below is a C program implementing the 2D Kadane’s Algorithm to process a heat map matrix, identifying the subregion with the maximum cumulative fire intensity.</p>
+            <div class="code-block">
+                <pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define MAXN 50 // Max grid size (50x50 heat map)
+#define INF 1000000 // Large value for initialization
+
+// 1D Kadane’s Algorithm for a given array
+void kadane_1d(int arr[], int n, int *max_sum, int *start, int *end) {
+    *max_sum = -INF;
+    int curr_sum = 0;
+    int curr_start = 0;
+
+    for (int i = 0; i < n; i++) {
+        curr_sum += arr[i];
+        if (curr_sum > *max_sum) {
+            *max_sum = curr_sum;
+            *start = curr_start;
+            *end = i;
+        }
+        if (curr_sum < 0) {
+            curr_sum = 0;
+            curr_start = i + 1;
+        }
+    }
+}
+
+// 2D Kadane’s Algorithm for heat map
+void kadane_2d(int matrix[][MAXN], int rows, int cols, int *max_sum,
+               int *top, int *bottom, int *left, int *right) {
+    int temp[MAXN] = {0};
+    *max_sum = -INF;
+
+    for (int l = 0; l < cols; l++) {
+        for (int i = 0; i < rows; i++) temp[i] = 0;
+        for (int r = l; r < cols; r++) {
+            for (int i = 0; i < rows; i++) temp[i] += matrix[i][r];
+
+            int curr_sum, curr_start, curr_end;
+            kadane_1d(temp, rows, &curr_sum, &curr_start, &curr_end);
+
+            if (curr_sum > *max_sum) {
+                *max_sum = curr_sum;
+                *top = curr_start;
+                *bottom = curr_end;
+                *left = l;
+                *right = r;
+            }
+        }
+    }
+}
+
+int main() {
+    int rows = 5, cols = 5; // Sample 5x5 heat map
+    int matrix[MAXN][MAXN] = {
+        {100, 200, 300, 100, 50},
+        {150, 400, 500, 200, 100},
+        {100, 300, 600, 300, 150},
+        {50, 200, 400, 200, 100},
+        {50, 100, 200, 100, 50}
+    };
+
+    int max_sum, top, bottom, left, right;
+    printf("Forest Fire Heat Map Analysis\n");
+    kadane_2d(matrix, rows, cols, &max_sum, &top, &bottom, &left, &right);
+
+    printf("Max fire intensity: %d\n", max_sum);
+    printf("Region: Rows %d-%d, Columns %d-%d\n", top, bottom, left, right);
+
+    return 0;
+}
+                </pre>
+            </div>
+
+            <h3>How It Works</h3>
+            <p>The C program models a heat map as a 2D matrix of fire intensity values (e.g., temperature in °C). The 2D Kadane’s Algorithm identifies the submatrix with the maximum sum, representing the most critical fire region. For the sample 5×5 heat map, it might output:</p>
+            <ul>
+                <li>Max fire intensity: 1800</li>
+                <li>Region: Rows 1-2, Columns 1-2</li>
+            </ul>
+
+            <h3>Starlink’s Role</h3>
+            <p>Starlink’s low-latency (~20 ms) and high-speed (150 Mbps) connectivity enables real-time transmission of heat map data from drones to a cloud server, where the 2D Kadane’s Algorithm processes it. This ensures rapid identification of critical fire zones, supporting timely interventions.</p>
+        </div>
+        <div class="section">
+    <h3>Time Complexity</h3>
+    <p>The time complexity of the 2D Kadane’s Algorithm is <strong>O(n³)</strong>, where <code>n</code> is the number of rows or columns in the matrix. This arises because:</p>
+    <ul>
+        <li>There are <code>O(n²)</code> pairs of left and right column boundaries.</li>
+        <li>For each pair, a 1D Kadane’s Algorithm is applied over <code>n</code> rows.</li>
+        <li>Hence, total operations: <code>O(n²) × O(n) = O(n³)</code>.</li>
+    </ul>
+    <p>Given the computational efficiency of modern cloud servers and the typical size of heat maps (e.g., 50×50), this complexity is practical for real-time wildfire analysis.</p>
+</div>
+
+<div class="section">
+    <h3>Inference from Algorithm Output</h3>
+    <p>Once the 2D Kadane’s Algorithm identifies the submatrix with the highest cumulative fire intensity, several key inferences can be drawn:</p>
+    <ul>
+        <li><strong>Priority Zone:</strong> The identified subregion represents the most critical area needing immediate attention.</li>
+        <li><strong>Evacuation Planning:</strong> Regions adjacent to the maximum intensity zone can be flagged for urgent evacuation advisories.</li>
+        <li><strong>Dynamic Monitoring:</strong> Reapplying the algorithm at short intervals (e.g., every 10 minutes) allows authorities to track fire spread dynamically.</li>
+        <li><strong>Resource Routing:</strong> Output coordinates guide autonomous drones, water tankers, or firefighter teams directly to high-intensity zones.</li>
+    </ul>
+    <p>This systematic, data-driven approach boosts the effectiveness of disaster management operations while reducing human error and reaction delays.</p>
+</div>
+
+    </div>
+</body>
+</html>

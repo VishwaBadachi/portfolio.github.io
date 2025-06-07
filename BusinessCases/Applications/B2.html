@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BharatNet Network Optimization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #1a73e8;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 1.8em;
+            margin-top: 30px;
+        }
+        h3 {
+            font-size: 1.4em;
+            margin-top: 20px;
+        }
+        p, li {
+            font-size: 1.1em;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        .code-block pre {
+            margin: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #1a73e8;
+            color: #fff;
+        }
+        .highlight {
+            background: #e8f0fe;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Case Study: BharatNet Network Infra Development Strategy</h1>
+        <div class="section">
+            <h2>Business Use Case: Strategic Investment in Critical Network Components</h2>
+            <p><strong>Background:</strong> BharatNet, a regional ISP, serves 5,000 customers in a mid-sized Indian city. The network, comprising routers, switches, and fiber/satellite links, faces outages during peak usage, affecting customer satisfaction.</p>
+            <p><strong>Objective:</strong> Identify critical network components (min-cut) whose failure disrupts service and invest in their redundancy to ensure reliability.</p>
+            <p><strong>Solution:</strong> Use the Min-Cut Max-Flow algorithm to find the critical links/nodes and prioritize upgrades.</p>
+            
+            <h3>Network Architecture</h3>
+            <ul>
+                <li><strong>Nodes:</strong> 1 core router (source), 10 distribution routers, 1 aggregation server (sink), and intermediate switches.</li>
+                <li><strong>Edges:</strong> Fiber links (1 Gbps) and satellite links (500 Mbps).</li>
+                <li><strong>Data Flow:</strong> Internet traffic from core router to customers via distribution routers and aggregation server.</li>
+            </ul>
+
+            <h3>Min-Cut Max-Flow Application</h3>
+            <p>The algorithm identifies the min-cut (e.g., two fiber links and one switch) whose failure would disconnect the network. Upgrading these ensures reliability.</p>
+            <p><strong>Investment:</strong></p>
+            <ul>
+                <li>Add redundant fiber links (₹3,32,000 each).</li>
+                <li>Upgrade switch to high-availability model (₹4,15,000).</li>
+                <li><strong>Total Cost:</strong> ₹10,79,000 for robust network.</li>
+            </ul>
+            <div style="text-align: center;">
+    <figure style="display: inline-block;">
+        <img src="../../assets/img/min cut max flow.png" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            Cut in graph showing prominent edges on stopping which the graph fails. (src: cs.emory.edu) 
+        </figcaption>
+    </figure>
+</div>
+            <h3>C Implementation of Min-Cut Max-Flow</h3>
+            <p>Below is a C program implementing the Ford-Fulkerson algorithm with BFS to compute the maximum flow and identify the min-cut in BharatNet’s network.</p>
+            <div class="code-block">
+                <pre>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define N 13 // Nodes: 1 core router, 10 distribution routers, 1 aggregation server, 1 switch
+
+// BFS to find augmenting path
+bool bfs(int graph[N][N], int s, int t, int parent[]) {
+    bool visited[N] = {false};
+    int queue[N], front = 0, rear = 0;
+    queue[rear++] = s;
+    visited[s] = true;
+    parent[s] = -1;
+
+    while (front < rear) {
+        int u = queue[front++];
+        for (int v = 0; v < N; v++) {
+            if (!visited[v] && graph[u][v] > 0) {
+                queue[rear++] = v;
+                parent[v] = u;
+                visited[v] = true;
+            }
+        }
+    }
+    return visited[t];
+}
+
+// Find min-cut edges
+void findMinCut(int graph[N][N], int s, int t) {
+    int rGraph[N][N]; // Residual graph
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            rGraph[i][j] = graph[i][j];
+
+    int parent[N];
+    int max_flow = 0;
+
+    // Augment flow while there is a path
+    while (bfs(rGraph, s, t, parent)) {
+        int path_flow = INT_MAX;
+        for (int v = t; v != s; v = parent[v]) {
+            int u = parent[v];
+            path_flow = path_flow < rGraph[u][v] ? path_flow : rGraph[u][v];
+        }
+        for (int v = t; v != s; v = parent[v]) {
+            int u = parent[v];
+            rGraph[u][v] -= path_flow;
+            rGraph[v][u] += path_flow;
+        }
+        max_flow += path_flow;
+    }
+
+    // Find reachable nodes from source in residual graph
+    bool visited[N] = {false};
+    int queue[N], front = 0, rear = 0;
+    queue[rear++] = s;
+    visited[s] = true;
+
+    while (front < rear) {
+        int u = queue[front++];
+        for (int v = 0; v < N; v++) {
+            if (!visited[v] && rGraph[u][v] > 0) {
+                queue[rear++] = v;
+                visited[v] = true;
+            }
+        }
+    }
+
+    // Print min-cut edges
+    printf("Critical components (Min-Cut edges):\n");
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            if (visited[i] && !visited[j] && graph[i][j] > 0)
+                printf("Edge from Node %d to Node %d (Capacity: %d Mbps)\n", i, j, graph[i][j]);
+
+    printf("Maximum Flow: %d Mbps\n", max_flow);
+}
+
+int main() {
+    // Sample network: 0=core router (source), 1-10=distribution routers, 11=switch, 12=aggregation server (sink)
+    int graph[N][N] = {0};
+    // Core router (0) to distribution routers (1,2) and switch (11)
+    graph[0][1] = 1000; // Fiber to router 1
+    graph[0][2] = 1000; // Fiber to router 2
+    graph[0][11] = 1000; // To switch
+    // Distribution routers to switch
+    for (int i = 1; i <= 10; i++)
+        graph[i][11] = 500; // Satellite links
+    // Switch to aggregation server
+    graph[11][12] = 1000; // Fiber to sink
+
+    printf("BharatNet Network Analysis\n");
+    findMinCut(graph, 0, 12);
+    return 0;
+}
+                </pre>
+            </div>
+
+            <h3>How It Works</h3>
+            <p>The C program models BharatNet’s network as a graph with 13 nodes. It uses the Ford-Fulkerson algorithm with BFS to compute the maximum flow and identify the min-cut edges (critical components). For the sample network, it might output:</p>
+            <ul>
+                <li>Edge from core router (0) to router 1 (1000 Mbps)</li>
+                <li>Edge from core router (0) to router 2 (1000 Mbps)</li>
+                <li>Edge from switch (11) to aggregation server (12) (1000 Mbps)</li>
+            </ul>
+            <p>These are the critical components to upgrade (e.g., add redundant links or high-availability switch).</p>
+        </div>
+        <div class="section">
+    <h3>Time and Space Complexity</h3>
+    <p><strong>Time Complexity:</strong> O(V × E²) — The algorithm uses the Edmonds-Karp implementation of Ford-Fulkerson, where each BFS takes O(E) time and is called at most O(V × E) times.</p>
+    <p><strong>Space Complexity:</strong> O(V²) — Due to the adjacency matrix representation of the graph and residual graph.</p>
+</div>
+
+<div class="section">
+    <h3>Inference</h3>
+    <p>By applying the Min-Cut Max-Flow algorithm, BharatNet can quantitatively determine the weak points in its network infrastructure. The identified min-cut edges represent the most vulnerable components whose failure will partition the network and lead to service disruptions.</p>
+    <p>Investing in redundancy for these components—such as adding backup fiber links and upgrading switches—offers the maximum reliability improvement with minimum cost. This data-driven strategy ensures better uptime, improved customer satisfaction, and optimal allocation of capital expenditures.</p>
+</div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Business Case 4: Inter-Satellite Relay Optimization</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0d6efd;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    h2 {
+      color: #0d6efd;
+      margin-top: 2rem;
+    }
+    pre {
+      background-color: #eee;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 8px;
+      font-family: Consolas, monospace;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    .tag {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      padding: 0.2rem 0.6rem;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Business Case 4: Inter-Satellite Routing Once the User is Conncted and Sends Data</h1>
+    <div style="text-align: center;">              
+                <img src="../../assets/img/ISR.jpg" style="display: block; margin-left: auto; margin-right: auto; width: 900px; height: 550px;">
+
+    </div>
+    <div class="section">
+      <h2>System Design Overview</h2>
+      <p>
+        Starlink’s data transmission architecture involves encapsulating user traffic such as HTTP, DNS, and VoIP into IP packets, which are further wrapped into custom MAC frames for over-the-air delivery. These frames are modulated using QPSK or 16QAM schemes, multiplexed via TDMA or FDMA, and transmitted over the uplink frequency of 14 GHz. Satellites receive, decode, and process these frames using protocols like TCP/UDP at the transport layer and IPv4/IPv6 with ICMP for network-level routing and diagnostics. Forward Error Correction (FEC) is applied to ensure resilience against data loss, while Quality of Service (QoS) mechanisms prioritize latency-sensitive traffic such as VoIP over bulk data. Once in space, packets are routed through optical Inter-Satellite Links (ISLs) using high-speed laser communication terminals, which interconnect satellites in a dynamic Layer 3 mesh network. This mesh employs a hybrid of link-state routing principles, similar to BGP and OSPF, to dynamically select optimal paths based on real-time link conditions. Fast forwarding is achieved using MPLS-like tag switching, and all communication over ISLs is supported by a coherent optical link layer capable of 100 Gbps throughput, enabling high-capacity, low-latency global data delivery.
+      </p>
+      <p>
+        Starlink satellites use inter-satellite links (ISLs) to relay data from one satellite to another before reaching a ground station. This is critical when the target ground station is not within direct line-of-sight. Each satellite determines the most efficient relay path through the mesh network of satellites in Low Earth Orbit (LEO).
+        The path is chosen based on metrics like link latency, bandwidth availability, and angular position stability. Instead of using Dijkstra’s algorithm, an enhanced version of A* is used. This version incorporates real-time link weights and predictive heuristics such as angular distance and projected motion to adapt to changing conditions.
+        This enables dynamic and adaptive routing, ensuring that data reaches the closest available ground station with minimal latency.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Pros</h2>
+      <p>
+        <span class="tag">✔</span> Reduces reliance on specific ground stations.<br>
+        <span class="tag">✔</span> Dynamic adaptation to satellite movement.<br>
+        <span class="tag">✔</span> Low latency paths in global coverage.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Cons</h2>
+      <p>
+        <span class="tag">✖</span> Requires constant computation due to satellite movement.<br>
+        <span class="tag">✖</span> Inter-satellite links have limited bandwidth.<br>
+        <span class="tag">✖</span> Computationally intensive routing for large constellations.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Key Data Structures</h2>
+      <p>
+        <span class="tag">Adjacency List</span> To represent the graph of satellite links.<br>
+        <span class="tag">Priority Queue</span> (used in A*) to select next best satellite.<br>
+        <span class="tag">Hash Map</span> For visited status and cost lookups.<br>
+        <span class="tag">Set</span> To maintain open/closed nodes in A*.
+      </p>
+    </div>\
+
+     <div style="text-align: center;">
+    <figure style="display: inline-block;">
+        <img src="../../assets/img/Astar.gif" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            Dynamic A* with Hueristics (src: Wikipedia)
+        </figcaption>
+    </figure>
+</div>
+
+    <div class="section">
+      <h2>Enhanced Pseudo Code (Dynamic A* with Heuristics)</h2>
+      <pre><code>function A_Star_Dynamic(source, destination, current_time):
+    open_set = priority_queue ordered by f(n)
+    open_set.push(source)
+
+    came_from = empty map
+    g_score = map with default value ∞
+    g_score[source] = 0
+
+    f_score = map with default value ∞
+    f_score[source] = heuristic(source, destination, current_time)
+
+    closed_set = empty set
+
+    while open_set is not empty:
+        current = open_set.pop()
+
+        if current == destination:
+            return reconstruct_path(came_from, current)
+
+        closed_set.add(current)
+
+        for each neighbor in get_neighbors(current, current_time):
+            if neighbor in closed_set:
+                continue
+
+            link_weight = compute_link_cost(current, neighbor, current_time)
+            tentative_g = g_score[current] + link_weight
+
+            if tentative_g &lt; g_score.get(neighbor, ∞):
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g
+                est_future = heuristic(neighbor, destination, current_time + estimated_travel_time(current, neighbor))
+                f_score[neighbor] = tentative_g + est_future
+
+                if neighbor not in open_set:
+                    open_set.push(neighbor)
+
+    return failure</code></pre>
+    </div>
+
+    <div class="section">
+      <h2>Heuristic Function (Example)</h2>
+      <pre><code>function heuristic(current, destination, time):
+    pos_current = predict_position(current, time)
+    pos_dest = predict_position(destination, time)
+
+    angular_distance = compute_angular_distance(pos_current, pos_dest)
+    predicted_link_stability = estimate_link_stability(current, destination, time)
+
+    return angular_distance / predicted_link_stability</code></pre>
+    </div>
+
+    <div class="section">
+      <h2>Efficiency</h2>
+      <p>
+        <strong>Time Complexity:</strong> O(E log V) depending on priority queue and dynamic heuristics.<br>
+        <strong>Space Complexity:</strong> O(V) for scores, open/closed sets, and path map.
+      </p>
+    </div>
+    <div class="section">
+  <h2>Inference</h2>
+  <p>
+    The inter-satellite relay optimization approach outlined above showcases how Starlink leverages a dynamic A* pathfinding strategy enhanced with predictive heuristics to adapt to the constantly changing topology of a LEO satellite constellation. By representing the network as a graph and dynamically updating link costs based on real-time conditions, the system ensures that user data is routed through the most efficient satellite paths, even as nodes move at high orbital velocities.
+    This method reduces latency, avoids congested or unstable links, and extends Starlink's global reach without ground station dependency. However, the trade-off lies in its computational intensity and the need for accurate satellite motion prediction. Overall, this routing architecture exemplifies a high-performance, scalable solution for resilient global data delivery in space-based internet systems.
+  </p>
+</div>
+
+  </div>
+</body>
+</html>

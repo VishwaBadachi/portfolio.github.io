@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Business Case 2: Satellite Link Management and Scheduling</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 2rem;
+    background-color: #f5f7fa;
+    color: #333;
+  }
+  .container {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  h1 {
+    color: #0d6efd;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    color: #0d6efd;
+    margin-top: 2rem;
+  }
+  pre {
+    background-color: #eee;
+    padding: 1rem;
+    overflow-x: auto;
+    border-radius: 8px;
+    font-family: Consolas, monospace;
+  }
+  .section {
+    margin-bottom: 2rem;
+  }
+  .tag {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    padding: 0.2rem 0.6rem;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Business Case 2: Satellite Link Management and Scheduling</h1>
+
+    <div style="text-align: center;">              
+        <img src="../../assets/img/Link Manager.jpg" style="display: block; margin-left: auto; margin-right: auto; width: 900px; height: 550px;">
+
+    </div>
+
+    <div class="section">
+      <h2>System Design Overview</h2>
+      <p>
+        Satellite link management in Starlink involves scheduling communication intervals between user terminals and satellites while avoiding conflicts on limited frequency channels.
+        The system precomputes available time slots using interval trees to efficiently query free time windows. An Earliest Deadline First (EDF) scheduling algorithm prioritizes transmissions based on their deadlines, maximizing channel utilization and reducing packet loss.
+        The backend monitors scheduled intervals, dynamically adjusts priorities, and handles retransmissions in case of failures.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Importance and Working of Interval Trees</h2>
+      <p>
+        Interval trees store intervals (communication time windows) in a balanced binary tree, allowing efficient queries for overlapping intervals.
+        Each node maintains the maximum end time of intervals in its subtree. When scheduling a new transmission, the system quickly checks for conflicts by comparing intervals and pruning irrelevant subtrees.
+        This allows fast determination of free time slots without exhaustive scanning.
+      </p>
+      <p><strong>Example:</strong> If a satellite has a busy interval from 10:00 to 10:30, interval trees help identify if a new request from 10:15 to 10:45 overlaps, preventing double-booking.</p>
+    </div>
+     <div style="text-align: center;">
+    <figure style="display: inline-block;">
+        <img src="../../assets/img/intervalTree.gif" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            Interval Tree above used to calculate sum between intervals, in our case intervals will be time and the nodes will have values 0 (empty slot) or 1 (Occupied slot) (src: Scaler)
+        </figcaption>
+    </figure>
+</div>
+    <div class="section">
+      <h2>Scheduling Algorithm: Earliest Deadline First (EDF)</h2>
+      <p>
+        EDF dynamically schedules tasks based on their deadlines, always choosing the task with the nearest deadline first.
+        This ensures high-priority transmissions meet their timing constraints, especially important in real-time satellite communication.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>EDF Scheduling Pseudocode</h2>
+      <pre><code>
+Initialize empty task list
+
+While tasks remain or new tasks arrive:
+    Sort tasks by earliest deadline
+    For each task in sorted order:
+        If task fits in available time slot:
+            Schedule the task
+            Remove from task list
+        Else:
+            Skip or wait for next slot
+      </code></pre>
+    </div>
+
+    <div class="section">
+      <h2>C Code: Interval Tree Implementation</h2>
+      <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct Interval {
+    int low, high;
+} Interval;
+
+typedef struct ITNode {
+    Interval *interval;
+    int max;
+    struct ITNode *left, *right;
+} ITNode;
+
+// Utility to create a new node
+ITNode* newNode(Interval i) {
+    ITNode* node = (ITNode*)malloc(sizeof(ITNode));
+    node->interval = (Interval*)malloc(sizeof(Interval));
+    node->interval->low = i.low;
+    node->interval->high = i.high;
+    node->max = i.high;
+    node->left = node->right = NULL;
+    return node;
+}
+
+// Insert a new interval
+ITNode* insert(ITNode* root, Interval i) {
+    if (root == NULL)
+        return newNode(i);
+
+    int l = root->interval->low;
+
+    if (i.low < l)
+        root->left = insert(root->left, i);
+    else
+        root->right = insert(root->right, i);
+
+    if (root->max < i.high)
+        root->max = i.high;
+
+    return root;
+}
+
+// Check if two intervals overlap
+int doOverlap(Interval i1, Interval i2) {
+    return (i1.low <= i2.high && i2.low <= i1.high);
+}
+
+// Search for any interval that overlaps with i
+Interval* overlapSearch(ITNode* root, Interval i) {
+    if (root == NULL) return NULL;
+
+    if (doOverlap(*(root->interval), i))
+        return root->interval;
+
+    if (root->left != NULL && root->left->max >= i.low)
+        return overlapSearch(root->left, i);
+
+    return overlapSearch(root->right, i);
+}
+
+// Example usage
+int main() {
+    ITNode* root = NULL;
+    root = insert(root, (Interval){15, 20});
+    root = insert(root, (Interval){10, 30});
+    root = insert(root, (Interval){17, 19});
+    root = insert(root, (Interval){5, 20});
+    root = insert(root, (Interval){12, 15});
+    root = insert(root, (Interval){30, 40});
+
+    Interval x = {14, 16};
+    printf("Searching for interval [%d, %d]:\n", x.low, x.high);
+    Interval *res = overlapSearch(root, x);
+    if (res == NULL)
+        printf("No Overlapping Interval\n");
+    else
+        printf("Overlaps with [%d, %d]\n", res->low, res->high);
+
+    return 0;
+}
+</code></pre>
+    </div>
+
+    <div class="section">
+      <h2>Key Data Structures</h2>
+      <p>
+        <span class="tag">Interval Tree</span> To maintain and query scheduled time intervals.<br />
+        <span class="tag">Array/List</span> To keep track of transmission tasks.<br />
+        <span class="tag">Sorting</span> For ordering tasks by deadline efficiently.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Efficiency</h2>
+      <p>
+        <strong>Time Complexity:</strong> Interval tree operations (insert, query) take O(log n) time; EDF scheduling involves sorting tasks O(m log m) where m is number of tasks.<br />
+        <strong>Space Complexity:</strong> O(n) for interval tree storage of intervals.
+      </p>
+    </div>
+    <div class="section">
+  <h2>Inferences</h2>
+  <p>
+    The design of satellite link scheduling in Starlink demonstrates how real-time communication demands are met using efficient algorithmic techniques. From this system, the following inferences can be made:
+  </p>
+  <ul>
+    <li><strong>Efficient Scheduling:</strong> The combination of Interval Trees and EDF ensures minimal conflict and maximum channel utilization, even with large-scale concurrent user demands.</li>
+    <li><strong>Real-Time Responsiveness:</strong> EDF scheduling ensures that time-critical data (like live video or emergency packets) is prioritized, reducing the likelihood of packet drops and transmission delays.</li>
+    <li><strong>Conflict Avoidance:</strong> Interval trees provide rapid overlap checks, preventing double-booking and maintaining signal integrity across multiple user terminals.</li>
+    <li><strong>Dynamic Adaptability:</strong> The system can dynamically insert or update tasks in near real-time, allowing fast response to network state changes or failures.</li>
+    <li><strong>Scalability:</strong> The algorithmic approach allows Starlink to scale link management across thousands of terminals and satellites without exponential overhead.</li>
+  </ul>
+</div>
+
+  </div>
+</body>
+</html>

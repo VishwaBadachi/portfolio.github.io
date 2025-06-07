@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Business Case 8: QoS Assurance with AI-based Traffic Prioritization</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0d6efd;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    h2 {
+      color: #0d6efd;
+      margin-top: 2rem;
+    }
+    pre {
+      background-color: #eee;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 8px;
+      font-family: Consolas, monospace;
+      font-size: 0.9rem;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    .tag {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      padding: 0.2rem 0.6rem;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Business Case 8: QoS Assurance with AI-based Traffic Prioritization</h1>
+
+    <div class="section">
+      <h2>System Design Overview</h2>
+      <p>
+        Starlink’s network handles diverse traffic types—video streaming, gaming, VoIP, bulk data transfers, etc.—each with different Quality of Service (QoS) requirements like latency, jitter, and bandwidth.
+      </p>
+      <p>
+        To ensure smooth service, the system dynamically prioritizes traffic flows using an AI-based traffic classification and scheduling algorithm integrated into ground stations and satellite gateways.
+      </p>
+      <p>
+        Incoming packets are first classified by a trained AI model (e.g., a lightweight decision tree or neural network) that predicts traffic class and priority based on packet metadata and flow statistics. Then, scheduling algorithms allocate bandwidth and transmission opportunities accordingly to meet QoS goals.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>AI Algorithm Integration</h2>
+      <p>
+        The AI component uses supervised learning, trained on labeled traffic samples, to recognize patterns in traffic flows such as real-time vs. bulk transfers.
+      </p>
+      <p>
+        The model inputs include features like packet size, inter-arrival time, source/destination ports, and historical flow behavior. The output is a traffic class label (e.g., <em>high-priority real-time</em>, <em>medium-priority bulk</em>, <em>low-priority background</em>).
+      </p>
+      <p>
+        This classification enables more intelligent and adaptive QoS than static rule-based systems.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>How It Works</h2>
+      <ol>
+        <li>Packets arrive at the network node (ground station or satellite gateway).</li>
+        <li>Metadata is extracted and fed into the AI classifier.</li>
+        <li>The classifier outputs a priority label for the traffic flow.</li>
+        <li>The scheduler allocates bandwidth and queue priority based on this label, using weighted fair queuing or other scheduling techniques.</li>
+        <li>Packets are transmitted respecting these priorities, ensuring latency-sensitive traffic is served first.</li>
+      </ol>
+    </div>
+    <div style="text-align: center;">              
+        <img src="../../assets/img/Case 8.png" style="display: block; margin-left: auto; margin-right: auto; width: 600px; height: 200px;">
+
+    </div>
+
+    <div class="section">
+      <h2>Pros</h2>
+      <p>
+        <span class="tag">✔</span> Adaptive traffic prioritization based on real-time data.<br />
+        <span class="tag">✔</span> Improved user experience with reduced latency for critical applications.<br />
+        <span class="tag">✔</span> Scalable to varying traffic patterns and loads.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Cons</h2>
+      <p>
+        <span class="tag">✖</span> Requires training data and model updates to maintain accuracy.<br />
+        <span class="tag">✖</span> Additional computational overhead at network nodes.<br />
+        <span class="tag">✖</span> Complexity in integrating AI with traditional network scheduling.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Key Data Structures and Algorithms</h2>
+      <p>
+        <span class="tag">Feature Vectors</span> – to represent packet/flow attributes.<br />
+        <span class="tag">Decision Tree / Neural Network</span> – AI classifier.<br />
+        <span class="tag">Weighted Fair Queuing (WFQ)</span> – for bandwidth allocation.<br />
+        <span class="tag">Priority Queues</span> – to manage packets by class priority.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Example Problem</h2>
+      <p>Classify incoming traffic into three priority classes using a simple decision tree, then schedule packet transmission using weighted fair queuing.</p>
+    </div>
+
+    <div class="section">
+      <h2>Pseudocode: AI-based Traffic Classification and Scheduling</h2>
+      <pre><code>// Pseudocode for AI-based Traffic Classification and Scheduling
+
+function classifyTraffic(packet):
+    features = extractFeatures(packet)  // size, port, timing, etc.
+    class_label = AIModel.predict(features)  // returns HIGH, MEDIUM, LOW
+    return class_label
+
+function schedulePackets(packetQueue):
+    queues = {HIGH: [], MEDIUM: [], LOW: []}
+    for packet in packetQueue:
+        class_label = classifyTraffic(packet)
+        queues[class_label].append(packet)
+
+    // Weighted Fair Queuing with weights for priority classes
+    weights = {HIGH: 5, MEDIUM: 3, LOW: 1}
+    while not allQueuesEmpty(queues):
+        for priority in [HIGH, MEDIUM, LOW]:
+            sendPackets(queues[priority], weights[priority])
+</code></pre>
+    </div>
+
+    <div class="section">
+      <h2>C Code: Simple Priority Queue Scheduler (Without AI Model)</h2>
+      <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define HIGH 0
+#define MEDIUM 1
+#define LOW 2
+
+typedef struct Packet {
+    int id;
+    int priority;
+    struct Packet* next;
+} Packet;
+
+typedef struct Queue {
+    Packet* front;
+    Packet* rear;
+} Queue;
+
+void enqueue(Queue* q, Packet* pkt) {
+    pkt->next = NULL;
+    if (!q->rear) {
+        q->front = q->rear = pkt;
+    } else {
+        q->rear->next = pkt;
+        q->rear = pkt;
+    }
+}
+
+Packet* dequeue(Queue* q) {
+    if (!q->front) return NULL;
+    Packet* pkt = q->front;
+    q->front = q->front->next;
+    if (!q->front) q->rear = NULL;
+    return pkt;
+}
+
+void sendPackets(Queue* q, int weight) {
+    int count = 0;
+    while (count &lt; weight) {
+        Packet* pkt = dequeue(q);
+        if (!pkt) break;
+        printf("Sent packet %d with priority %d\n", pkt->id, pkt->priority);
+        free(pkt);
+        count++;
+    }
+}
+
+int main() {
+    Queue queues[3] = {0};
+
+    // Simulate packets (id, priority)
+    Packet* p1 = malloc(sizeof(Packet)); *p1 = (Packet){1, HIGH, NULL};
+    Packet* p2 = malloc(sizeof(Packet)); *p2 = (Packet){2, LOW, NULL};
+    Packet* p3 = malloc(sizeof(Packet)); *p3 = (Packet){3, MEDIUM, NULL};
+    Packet* p4 = malloc(sizeof(Packet)); *p4 = (Packet){4, HIGH, NULL};
+    Packet* p5 = malloc(sizeof(Packet)); *p5 = (Packet){5, LOW, NULL};
+
+    enqueue(&queues[HIGH], p1);
+    enqueue(&queues[LOW], p2);
+    enqueue(&queues[MEDIUM], p3);
+    enqueue(&queues[HIGH], p4);
+    enqueue(&queues[LOW], p5);
+
+    // Weights for WFQ
+    int weights[3] = {5, 3, 1};
+
+    // Simple scheduler loop
+    int rounds = 3; // number of scheduling cycles
+    for (int i = 0; i < rounds; i++) {
+        for (int pr = HIGH; pr <= LOW; pr++) {
+            sendPackets(&queues[pr], weights[pr]);
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+    </div>
+
+    <div class="section">
+      <h2>Efficiency and Complexity</h2>
+      <p>
+        The AI classifier typically operates in O(1) or O(log n) time depending on model type (decision trees are O(log n)), enabling real-time classification. The scheduler’s weighted fair queuing adds overhead proportional to the number of packets and priority classes, generally O(n).
+      </p>
+      <p>
+        Overall, the solution balances responsiveness with computational cost, making it feasible for deployment in Starlink’s network edge nodes.
+      </p>
+    </div>
+    <div>
+  <h2>Inference</h2>
+  <p>
+    This business case proposes an intelligent QoS management framework for Starlink using AI-driven traffic classification and dynamic scheduling. The system classifies incoming packets into priority levels (high, medium, low) based on metadata and traffic behavior using a machine learning model. It then schedules packet transmissions using Weighted Fair Queuing (WFQ) to ensure real-time and critical applications receive preferential treatment.
+  </p>
+  <p>
+    This approach enhances user experience by reducing latency and jitter for time-sensitive services while maintaining fairness and scalability. Although it introduces additional computational overhead and integration complexity, the AI-based method is significantly more adaptive and effective than traditional static QoS mechanisms.
+  </p>
+  <p>
+    The implementation showcases a practical balance between performance and resource utilization, making it suitable for Starlink’s edge infrastructure where intelligent traffic control is vital for consistent connectivity.
+  </p>
+</div>
+
+  </div>
+</body>
+</html>

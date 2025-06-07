@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Business Case 7: Firewall Implementation Using Trie</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0d6efd;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    h2 {
+      color: #0d6efd;
+      margin-top: 2rem;
+    }
+    pre {
+      background-color: #eee;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 8px;
+      font-family: Consolas, monospace;
+      font-size: 0.9rem;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    .tag {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      padding: 0.2rem 0.6rem;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Business Case 7: Firewall Implementation Using Trie for Prefix Matching</h1>
+
+    <div class="section">
+      <h2>System Design Overview</h2>
+      <p>
+        Starlink’s network requires efficient and secure packet filtering to enforce security policies as packets traverse ground stations and satellite nodes. Firewall rules are based on IP prefixes, and the system uses a <strong>Trie (prefix tree)</strong> to store and lookup these rules.
+      </p>
+      <p>
+        Incoming packets’ destination IP addresses are matched against the Trie to find the longest prefix match, which determines the firewall action such as <em>ALLOW</em>, <em>DENY</em>, or <em>LOG</em>. This approach supports fast and scalable IP prefix matching essential for real-time traffic inspection.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>How Trie Works for Firewall</h2>
+      <p>
+        A Trie is a tree structure where each node represents a bit of the IP address. Inserting a rule like <code>192.168.1.0/24</code> involves inserting the first 24 bits into the Trie. When a packet arrives, its IP is converted to a binary string and traversed bit-by-bit through the Trie, searching for the longest matching prefix that corresponds to a rule.
+      </p>
+      <p>
+        The firewall then applies the action (allow or deny) from the best-matching rule found.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Pros</h2>
+      <p>
+        <span class="tag">✔</span> Efficient longest prefix matching (O(W), W=32 for IPv4).<br>
+        <span class="tag">✔</span> Scalable to large sets of prefix-based firewall rules.<br>
+        <span class="tag">✔</span> Supports hierarchical CIDR rules naturally.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Cons</h2>
+      <p>
+        <span class="tag">✖</span> Can consume large memory if the Trie is sparse.<br>
+        <span class="tag">✖</span> More complex to maintain than flat hash-based lookups.<br>
+        <span class="tag">✖</span> Updates to rules can be more involved.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Key Data Structures</h2>
+      <p>
+        <span class="tag">Trie (Prefix Tree)</span> – for efficient IP prefix matching.<br>
+        <span class="tag">Queue</span> – for packet processing.<br>
+        <span class="tag">Hash Map</span> – optional for rule metadata storage.
+      </p>
+    </div>
+    <div style="text-align: center;">
+    <figure style="display: inline-block;">
+        <img src="../../assets/img/Trie.gif" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+           Trie data structure, in our case sequnce will be comprised of 0s and 1s. (src: Medium)
+        </figcaption>
+    </figure>
+</div>
+    <div class="section">
+      <h2>Example Problem</h2>
+      <p>Insert firewall rules as IP prefixes and actions, then test packet IPs to determine if they should be allowed or denied based on longest prefix matching.</p>
+    </div>
+
+    <div class="section">
+      <h2>C Code: Trie for Firewall Prefix Matching</h2>
+      <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+#define ALLOW 1
+#define DENY  0
+
+typedef struct TrieNode {
+    int is_end;
+    int action;
+    struct TrieNode *child[2];
+} TrieNode;
+
+TrieNode* createNode() {
+    TrieNode* node = (TrieNode*)malloc(sizeof(TrieNode));
+    node->is_end = 0;
+    node->action = DENY;
+    node->child[0] = node->child[1] = NULL;
+    return node;
+}
+
+void insert(TrieNode* root, const char* ip_bin, int action) {
+    TrieNode* current = root;
+    for (int i = 0; ip_bin[i]; i++) {
+        int bit = ip_bin[i] - '0';
+        if (!current->child[bit])
+            current->child[bit] = createNode();
+        current = current->child[bit];
+    }
+    current->is_end = 1;
+    current->action = action;
+}
+
+int search(TrieNode* root, const char* ip_bin) {
+    TrieNode* current = root;
+    int last_action = DENY;
+    for (int i = 0; ip_bin[i]; i++) {
+        int bit = ip_bin[i] - '0';
+        if (!current->child[bit])
+            break;
+        current = current->child[bit];
+        if (current->is_end)
+            last_action = current->action;
+    }
+    return last_action;
+}
+
+// Convert 4-part IP to binary string
+void ip_to_binary(const char* ip, char* bin) {
+    unsigned int a, b, c, d;
+    sscanf(ip, "%u.%u.%u.%u", &a, &b, &c, &d);
+    for (int i = 0; i < 8; i++) bin[i]   = ((a >> (7 - i)) & 1) + '0';
+    for (int i = 0; i < 8; i++) bin[i+8] = ((b >> (7 - i)) & 1) + '0';
+    for (int i = 0; i < 8; i++) bin[i+16] = ((c >> (7 - i)) & 1) + '0';
+    for (int i = 0; i < 8; i++) bin[i+24] = ((d >> (7 - i)) & 1) + '0';
+    bin[32] = '\0';
+}
+
+int main() {
+    TrieNode* root = createNode();
+    char bin[33];
+
+    // Insert rules
+    ip_to_binary("192.168.1.0", bin); insert(root, bin, ALLOW);   // Rule 1
+    ip_to_binary("10.0.0.0", bin);     insert(root, bin, DENY);    // Rule 2
+
+    // Test packets
+    ip_to_binary("192.168.1.25", bin);
+    printf("Packet 1: %s\n", search(root, bin) ? "ALLOW" : "DENY");
+
+    ip_to_binary("10.0.0.5", bin);
+    printf("Packet 2: %s\n", search(root, bin) ? "ALLOW" : "DENY");
+
+    return 0;
+}
+      </code></pre>
+    </div>
+
+    <div class="section">
+      <h2>Efficiency</h2>
+      <p>
+        <strong>Time Complexity:</strong> O(W) per insert/search, where W = 32 bits for IPv4.<br />
+        <strong>Space Complexity:</strong> O(N × W), with N rules and W bits per rule.
+      </p>
+    </div>
+    <div class="section">
+  <h2>Inference</h2>
+  <p>
+    The Trie-based firewall implementation effectively demonstrates how prefix trees enable fast and accurate packet filtering in large-scale, real-time systems like Starlink. By mapping firewall rules to binary prefixes of IP addresses, the system can perform <strong>longest prefix matching</strong> in constant time per bit, which is crucial for high-throughput environments.
+  </p>
+  <p>
+    This data structure not only supports hierarchical and overlapping CIDR rules naturally but also scales well with increasing rule sets. Despite its memory overhead and complexity in updates, the Trie proves to be a powerful tool in network security infrastructure where speed and correctness of access control decisions are paramount.
+  </p>
+  <p>
+    Overall, the approach aligns with Starlink’s requirement for low-latency, high-efficiency security processing, making it a viable and strategic solution for satellite internet-based firewall architectures.
+  </p>
+</div>
+
+  </div>
+</body>
+</html>

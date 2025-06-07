@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Business Case 5: Failover Zone Precomputation using KD-Tree & Union-Find</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0d6efd;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    h2 {
+      color: #0d6efd;
+      margin-top: 2rem;
+    }
+    pre {
+      background-color: #eee;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 8px;
+      font-family: Consolas, monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    .tag {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      padding: 0.2rem 0.6rem;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Business Case 5: Failover Zone Precomputation using KD-Tree & Union-Find</h1>
+    <div style="text-align: center;">              
+                <img src="../../assets/img/GS Routing Manager.jpg" style="display: block; margin-left: auto; margin-right: auto; width: 900px; height: 550px;">
+
+    </div>
+    <p>
+        Starlink's ground station network acts as the terrestrial endpoint for satellite internet. Ground stations (or gateways) are distributed geographically and are connected to the broader internet infrastructure. Each satellite maintains a connection to at least one ground station when possible.
+
+When a satellite cannot reach its default ground station due to congestion, failure, or weather-related issues, it must quickly re-route its data through other available ground stations. To ensure resilience, Starlink uses a failover system that dynamically computes the best ground station route using a modified version of multi-source routing algorithms and live telemetry.
+    </p>
+
+    <div class="section">
+      <h2>System Design Overview</h2>
+      <p>
+        Starlink ground stations are grouped into failover zones to ensure continuous service if a station fails. To precompute these zones, a KD-tree spatial index is constructed over all ground stations based on their coordinates.
+        Each station performs a range query on the KD-tree to find all neighbors within a predefined radius (e.g., 300 km). These neighboring stations are merged into the same failover zone using a Union-Find data structure that efficiently maintains disjoint sets.
+        This hybrid method ensures fast spatial queries and logical grouping of stations, enabling effective failover management.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>How It Works</h2>
+      <p>
+        The KD-tree organizes ground stations in k-dimensional space, allowing fast queries to find nearby stations. For each station, neighbors within the failover radius are found using a range query.
+        Union-Find merges these stations into groups, ensuring that each failover zone is a connected cluster. The final result is a collection of disjoint sets representing failover zones, which can be queried efficiently during operation.
+      </p>
+    </div>
+
+    <div style="text-align: center;">              
+        <img src="../../assets/img/Case 5.png" style="display: block; margin-left: auto; margin-right: auto; width: 900px; height: 550px;">
+
+    </div>
+
+    <div class="section">
+      <h2>Pros</h2>
+      <p>
+        <span class="tag">✔</span> KD-tree enables efficient spatial queries even with large datasets.<br>
+        <span class="tag">✔</span> Union-Find provides near-constant-time union and find operations.<br>
+        <span class="tag">✔</span> Combined approach allows scalable precomputation of failover zones.<br>
+        <span class="tag">✔</span> Dynamically adapts to station additions/removals with minor updates.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Cons</h2>
+      <p>
+        <span class="tag">✖</span> KD-tree construction can be costly for extremely large or high-dimensional data.<br>
+        <span class="tag">✖</span> Union-Find does not store spatial relationship details beyond connectivity.<br>
+        <span class="tag">✖</span> Precomputed zones may require frequent updates in highly dynamic environments.<br>
+        <span class="tag">✖</span> Accuracy depends on choice of failover radius parameter.
+      </p>
+    </div>
+    <div style="text-align: center;">
+    <figure style="display: inline-block;">
+        <img src="../../assets/img/KDTree.gif" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            KDTrees Formation and Representation  (src: Wikimedia Commons) 
+        </figcaption>
+    </figure>
+</div>
+    <div class="section">
+      <h2>Efficiency</h2>
+      <p>
+        <strong>KD-tree Construction:</strong> O(n log n), where n is the number of ground stations.<br>
+        <strong>KD-tree Range Query:</strong> O(√n + m) average time, where m is number of neighbors found.<br>
+        <strong>Union-Find Operations:</strong> Amortized O(α(n)) per union/find (α = inverse Ackermann function, practically constant).<br>
+        <strong>Space Complexity:</strong> O(n) for both KD-tree and Union-Find structures.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Pseudocode: Precompute Failover Zones using KD-Tree and Union-Find</h2>
+      <pre><code>// Build a KD-tree from all ground station coordinates
+BuildKDTree(stations)
+
+// Initialize Union-Find for n stations
+uf = UnionFind(n)
+
+for each station s in stations:
+    neighbors = KDTreeRangeQuery(s, radius)
+    for each neighbor in neighbors:
+        uf.union(s.id, neighbor.id)
+
+// After processing, uf represents failover zones as disjoint sets
+</code></pre>
+    </div>
+
+    <div class="section">
+      <h2>Pseudocode: Union-Find Data Structure</h2>
+      <pre><code>class UnionFind:
+    constructor(n):
+        parent = array of size n
+        rank = array of size n initialized to 0
+        for i in 0 to n-1:
+            parent[i] = i
+
+    function find(x):
+        if parent[x] != x:
+            parent[x] = find(parent[x])  // path compression
+        return parent[x]
+
+    function union(x, y):
+        rootX = find(x)
+        rootY = find(y)
+        if rootX != rootY:
+            if rank[rootX] < rank[rootY]:
+                parent[rootX] = rootY
+            else if rank[rootX] > rank[rootY]:
+                parent[rootY] = rootX
+            else:
+                parent[rootY] = rootX
+                rank[rootX] += 1
+</code></pre>
+    </div>
+    
+<div class="section">
+  <h2>Inference</h2>
+  <p>
+    This business case demonstrates how Starlink ensures high availability and resilience in its ground station network through precomputed failover zones. By leveraging a spatial indexing structure (KD-tree) for proximity queries and a Union-Find data structure for set formation, the system efficiently clusters ground stations into zones that can dynamically handle traffic redirection in the event of outages, congestion, or environmental disturbances.
+  </p>
+  <p>
+    The KD-tree allows fast geographic queries even in large deployments, while Union-Find ensures minimal overhead in managing zone memberships. The tradeoff between performance and responsiveness to topological change is evident, highlighting the need for periodic recomputation. Overall, this hybrid approach offers a scalable, fault-tolerant solution for terrestrial link management in satellite internet infrastructure.
+  </p>
+</div>
+
+  </div>
+</body>
+</html>
