@@ -127,6 +127,14 @@
             </ul>
         </div>
 
+        <figure style="display: inline-block;">
+        <img src="../../assets/img/AVSD.png" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            System Design for the Ecosystem. 
+        </figcaption>
+    </figure>
+</div>
+
         <div class="section">
             <h2>Data Structures</h2>
             <table>
@@ -169,6 +177,8 @@
             </table>
         </div>
 
+
+
         <div class="section">
             <h2>Algorithms</h2>
             <table>
@@ -210,6 +220,14 @@
                 </tr>
             </table>
         </div>
+
+        <figure style="display: inline-block;">
+        <img src="../../assets/img/AVFC.png" style="width: 500px; height: 300x; display: block; margin: 0 auto;">
+        <figcaption style="margin-top: 8px; font-style: italic; color: #555;">
+            Flow Diagram for the Pseudocode.
+        </figcaption>
+    </figure>
+</div>
 
         <div class="section">
             <h2>Complete Pipeline Pseudocode</h2>
@@ -272,5 +290,34 @@ function main_pipeline():
                 </pre>
             </div>
         </div>
+        <div class="section">
+    <h2>Time and Space Complexity</h2>
+    <p>This section outlines the computational efficiency of the data structures and algorithms used in the Starlink-enabled AV ecosystem:</p>
+    <ul>
+        <li><strong>Spatial R-Tree</strong>: O(log n) time for insertions and range queries; space is proportional to the number of spatial entries (vehicles).</li>
+        <li><strong>Dynamic Graph</strong>: O(1) edge updates; O(V + E) space where V is vertices and E is edges in the road network.</li>
+        <li><strong>Fibonacci Heap</strong>: O(1) insertion, O(log n) deletion; uses O(n) space for n events.</li>
+        <li><strong>Trie</strong>: O(m) lookup time where m is the length of the packet header; space complexity is O(k * m) where k is the number of entries.</li>
+        <li><strong>Bloom Filter</strong>: O(1) query and insert time; space complexity is O(k), where k is the number of hash functions used.</li>
+        <li><strong>IAHRL</strong>: Training time is high due to imagination rollouts; inference time is sub-second per vehicle; model storage is O(n) for network parameters.</li>
+        <li><strong>Contraction Hierarchies</strong>: Preprocessing time O(n log n), query time O(log n); space complexity increases due to additional shortcuts.</li>
+        <li><strong>A* with Dynamic Weights</strong>: Worst-case O(b<sup>d</sup>) where b is branching factor and d is depth; space complexity is proportional to explored nodes.</li>
+        <li><strong>DDPG</strong>: O(1) inference time; training is O(n) per episode; space depends on replay buffer and neural network size.</li>
+        <li><strong>K-Means Clustering</strong>: O(nkt) where n is number of points, k is clusters, t is iterations; space is O(n + k).</li>
+    </ul>
+</div>
+<div class="section">
+    <h2>Inference</h2>
+    <p>The integrated system demonstrates that Starlink’s satellite network significantly enhances autonomous vehicle ecosystems by enabling:</p>
+    <ul>
+        <li><strong>Real-Time Responsiveness</strong>: Low latency allows safe and quick decision-making even in remote areas.</li>
+        <li><strong>Scalable Architecture</strong>: Efficient data structures and learning models support millions of vehicles globally.</li>
+        <li><strong>Autonomous Intelligence</strong>: Reinforcement learning and clustering improve over time using shared and aggregated experiences.</li>
+        <li><strong>Resilience and Redundancy</strong>: Decentralized control with V2V/V2I fallback reduces reliance on any single point of failure.</li>
+        <li><strong>Future-Readiness</strong>: Modular components like IAHRL and DDPG can incorporate future hardware and software updates over Starlink.</li>
+    </ul>
+    <p>This architecture establishes a foundation for a globally connected, intelligent, and adaptive autonomous vehicle network.</p>
+</div>
+
 </body>
 </html>
